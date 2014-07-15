@@ -1,7 +1,6 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 use warnings;
 use strict;
-
 
 use Getopt::Long;
 
@@ -11,129 +10,198 @@ my $usage = "
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 (C) R D Emes University of Nottingham 2010
 
-pull multiple subsequences from multiple fasta files
+parse exonerate
 
 USAGE:
--f	path to directory containing fasta files of type name.fa
--c	co-ordinates file name, chrosome, start, end, strand (-/+)
--o	output file
+-s	protein sequence file to use as template for predictions [fasta format]
+-d	directory of of DNA or chromosome files [should be named x.fa]
+-p	prefix for gene predictions
+-o	minimum size of overlap (amino acids of protein seq)
+-i	maximum number of introns allowed in predicted genes
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 " ;
 
 
-my ($file, $coord, $out);
+my ($seq, $dir, $prefix, $overlap, $max_introns);
 
 GetOptions(
-        'f|fasta:s'     => \$file,
-        'c|coorrd:s'   => \$coord,
-	'o|output:s'   => \$out,	
-                 );
+        's|seq:s'     => \$seq,
+	'd|dir:s'     => \$dir,
+        'p|prefix:s'     => \$prefix,
+        'o|overlap:s'     => \$overlap,
+	'i|prefix:s'     => \$max_introns,
+	 );
 
 
-if( ! defined $file) {
-print "$usage\nWARNING: Cannot proceed without directory of fasta files to process\n\n"; exit;
+if( ! defined $seq) {
+print "$usage\nWARNING: Cannot proceed without peptide sequence file to process\n\n"; exit;
 }
-if( ! defined $coord) {
-print "$usage\nWARNING: Cannot proceed coordinates file\n\n"; exit;
+if( ! defined $dir) {
+print "$usage\nWARNING: Cannot proceed without directory of chromosomes to search\n\n"; exit;
 }
-if( ! defined $out) {
-print "$usage\nWARNING: Cannot proceed without output file\n\n"; exit;
+if( ! defined $prefix) {
+print "$usage\nWARNING: Cannot proceed without prefix name\n\n"; exit;
 }
+
+if( ! defined $overlap) {
+print "$usage\nWARNING: Cannot proceed without minimum overlap\n\n"; exit;
+}
+if( ! defined $max_introns) {
+print "$usage\nWARNING: Cannot proceed without max number of introns\n\n"; exit;
+}
+
+
+
 ####################################################
 
-if ($file =~ /(.*?)\/$/){$file = $1;}
-open OUT, ">$out";
 
-# read in and sort coordinates file into chrosomes
-open COORD, $coord;
-my @list_of_fasta = (); # will hold a unique list of fasta files to process
-my %fasta_lookup;
 
-while (<COORD>)
-{
-chomp $_;
-my $line = $_;
-my @data = split '\t', $line;
-my $fasta_file = $data[1];
-push @{$fasta_lookup{$fasta_file}}, $line;
-push @list_of_fasta, $fasta_file;
-}
+#collect all data folders to be analyzed
+if ($dir =~ /\/$/){}
+else {$dir = $dir."/";}
 
-my @uniq_list = uniq_array(@list_of_fasta);
-@list_of_fasta = @uniq_list;
 
-foreach (@list_of_fasta)
-{
-chomp $_;
-my $fasta = $_;
-my @working = @{$fasta_lookup{$fasta}};
+opendir(FILES, $dir)  || die "can't open directory ($!)";
 
-## read in fasta file 
-my $fasta_sequence;
-{
-	open FASTA, "$file\/$fasta";
+my @tmp = sort readdir(FILES);
+my @folders = ();
+closedir(FILES);
+foreach(@tmp)
+        {
+        if(/\.fa$/)
+                {push(@folders, $_);
+                }
+        }
+@tmp=();
+
+
+my $time = scalar localtime;
+print "\nStarting Exonerate\t$time\n";
+
+
+foreach (@folders)
 	{
-	local $/ = '>'; 
-	<FASTA>;                                             # throw away the first line 'cos will only contain ">"
+	chomp $_;
+	my $filename = $_;
+	my $file2process = "$dir"."$filename";
+	system "perl exonerate.predict.genes.pl -f $seq -g $file2process -o $seq\.$filename\.ex -p $seq\.$filename\.ex\.fa -b N";
+	print ".";
+	}
+print "\n";
+$time = scalar localtime;
+print "Finished Exonerate\t$time\n";
 
-	while (<FASTA>) 
-		{	
+
+$time = scalar localtime;
+print "\nParsing Exonerate\t$time\n";
+
+foreach (@folders)
+	{
+	chomp $_;
+	my $filename = $_;
+	my $infile = "$seq\.$filename"."\.ex";
+	system "perl exonerate.parse.pl -f $infile -o $infile\.parsed";
+	print ".";
+	}
+print "\n";
+$time = scalar localtime;
+print "Finished Parsing Exonerate\t$time\n";
+
+
+
+
+$time = scalar localtime;
+print "\nFinding non-overlapping best hits\t$time\n";
+
+foreach (@folders)
+	{
+	chomp $_;
+	my $filename = $_;
+	my $infile = "$seq\.$filename\.ex\.parsed";
+	system "perl find.non.overlapping.exonerate.predictions.pl -f $infile -o $infile\.nonoverlapping -p $prefix -c $filename -i $max_introns -m $overlap";
+	print ".";
+	}
+print "\n";
+$time = scalar localtime;
+print "Finished Finding non-overlapping predicted genes\t$time\n";
+
+
+$time = scalar localtime;
+print "\nParse hit list\t$time\n";
+my $uniq_number = 1;
+open TABLE, ">$seq\.predictions.table";
+print TABLE "Unique_Name\tChr_prediction_name\tChr\tProtein Seq\tscore\tquery_start\tquery_end\tquery_length\ttarget_start\ttarget_end\ttarget_length\tStrand\tIntrons\n";
+foreach (@folders)
+	{
+	chomp $_;
+	my $filename = $_;
+	my $infile = "$seq\.$filename\.ex\.parsed\.nonoverlapping";
+	open FILE, "<$infile";
+		while (<FILE>)
+		{
 		chomp $_;
-		my ($seq_id, @sequence) = split "\n";            # split the fasta input into Id and sequence
-		$fasta_sequence = join '',@sequence;          # reassembles the sequence
-		@sequence = ();
+		my $line = $_;
+		if ($line =~ /^Name/){}
+		else {
+			print TABLE "$prefix\.$uniq_number\t$line\n";
+			$uniq_number++;
+			}
 		}
+	close FILE;
 	}
-	close FASTA;
-}
 
-foreach (@working) 
+$time = scalar localtime;
+print "Finished Producing hit list table\t$time\n";
+close TABLE;
+
+$time = scalar localtime;
+print "\nGenerate Fasta File of predictions\t$time\n";
+open POSITIONS_TABLE, ">tmp.table";
+open INFILE, "$seq\.predictions.table";
+<INFILE>; #remove header
+
+while (<INFILE>)
+	{
+	chomp $_;
+	my $line = $_;
+	my @data = split '\t', $line;
+	print POSITIONS_TABLE "$data[0]\t$data[2]\t$data[8]\t$data[9]\t$data[11]\n";
+	}
+	close POSITIONS_TABLE;
+
+system "split -l 50 tmp.table split.";
+
+opendir(SPLITS, "./")  || die "can't open directory ($!)";
+my @splits = sort readdir(SPLITS);
+my @split_files = ();
+
+closedir(SPLITS);
+foreach(@splits)
+        {
+        if(/split\.*/)
+                {push(@split_files, $_);
+                }
+        }
+@splits = ();
+
+foreach (@split_files)
 {
 chomp $_;
-my @data2 = split '\t', $_;
-my $name = $data2[0];
-my $chr = $data2[1];
-my $start = $data2[2];
-my $start_print = $start;
-#~ $start--;
-my $end = $data2[3];
-my $strand = $data2[4];
 
-my $length = ($end-$start);
-
-my $seq = substr($fasta_sequence, $start, $length); #$seq, start, length of substring)
-
-if ($strand eq "-")
-	{
-	my $rev_comp = reverse $seq;
-	$rev_comp =~ tr/NACGTacgtn/NTGCAtgcan/;
-	$seq = $rev_comp;
-	}
-
-
-print OUT "\>$name\_$chr\_$start_print\_$end\n$seq\n";
-
+system "perl list2.subsequence.pl -f $dir -c $_ -o $_\.splits.tojoin";
 }
 
+system "cat *.splits.tojoin > $seq\.predictions.fa";
+system "rm split*";
 
-}
 
-close OUT;
+$time = scalar localtime;
+print "Finished Generate Fasta File of predictions\t$time\n";
+close INFILE;
+
+
+## Cleanup
+system "rm tmp.table";
+system "mkdir Exonerate_prediction_files";
+system "mv *.ex *.ex.fa *.summary *.parsed *.parsed.nonoverlapping Exonerate_prediction_files/";
 exit;
-
-##### SUBROUTINES
-sub uniq_array{
-##### make a unique list from the @genes array
-my @in = @_;
-my %seen = ();
-my @uniq = ();
-foreach (@in)
-{chomp $_;
-unless ($seen{$_}){
-$seen{$_} = 1;
-push (@uniq, $_);
-}
-}
-
-return @uniq;
-}
