@@ -15,7 +15,6 @@ parse exonerate
 USAGE:
 -f	exonerate file
 -o	output file
-
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 " ;
 
@@ -56,7 +55,7 @@ my $strand = "";
 my $query_length = 0;
 my $target_length = 0;
 my $intron_count = 0;
-
+my $flag_hit = 0;
 while (<FILE>)
 {
 chomp $_;
@@ -67,7 +66,7 @@ elsif ($_ =~ /^Command line\:/){}
 elsif ($_ =~ /^Hostname/){}
 
 
-elsif ($_ =~ /^\s+Query\:\s+(.*?)\s+/){$query = $1}
+elsif ($_ =~ /^\s+Query\:\s+(.*)/){$query = $1;  $query =~ s/\s+$//;}
 elsif ($_ =~ /^\s+Raw score\:\s+(\d+)/) {$score = $1}
 elsif ($_ =~ /^\s+Query range\:\s+(\d+)\s+\-\>\s+(\d+)\s*/)
 		{
@@ -96,10 +95,9 @@ elsif ($_ =~ /^\s+Target range\:\s+(\d+)\s+\-\>\s+(\d+)\s*/)
 		}
 		
 		}
-elsif ($_ =~ /Target Intron/)
+elsif ($_ =~ /> T/ || /\:\s+Targ/)
 	{
-	$intron_count += () = $_ =~ /Target Intron/g;
-	#~ print OUT "$_\n"; ## woudl print sequence
+	$intron_count++;
 	}
 
 elsif ($_ =~ /^\>/)
