@@ -95,7 +95,7 @@ my $name = $data2[0];
 my $chr = $data2[1];
 my $start = $data2[2];
 my $start_print = $start;
-#~ $start--;
+$start--;
 my $end = $data2[3];
 my $strand = $data2[4];
 
