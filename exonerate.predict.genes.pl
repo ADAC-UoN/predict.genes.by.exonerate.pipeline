@@ -59,14 +59,12 @@ if( ! defined $best)
 ### RUN EXONERATE
 if ($best eq "Y" || $best eq "y")
 {
-#~ system "~/tools/exonerate-2.2.0-x86_64/bin/exonerate --model protein2genome --bestn 1 --ryo \">%ti (%tab - %tae)\n%tcs\n\" --showcigar no --showquerygff no --showvulgar no --showalignment yes --useaatla no $file $genomic > $output";
-system "/panfs/panasas01.panfs.cluster/svxkb/exonerate-2.2.0-x86_64/bin/exonerate --model protein2genome --bestn 1 --ryo \">%ti (%tab - %tae)\n%tcs\n\" --showcigar no --showquerygff no --showvulgar no --showalignment yes --useaatla no -q $file -t $genomic > $output";
+system "~/tools/exonerate-2.2.0-x86_64/bin/exonerate --model protein2genome --bestn 1 --ryo \">%ti (%tab - %tae)\n%tcs\n\" --showcigar no --showquerygff no --showvulgar no --showalignment yes --useaatla no $file $genomic > $output";
 }
 
 elsif ($best eq "N" || $best eq "n")
 {
-#~ system "~/tools/exonerate-2.2.0-x86_64/bin/exonerate --model protein2genome --ryo \">%ti (%tab - %tae)\n%tcs\n\" --showcigar no --showquerygff no --showvulgar no --showalignment yes --useaatla no $file $genomic > $output";
-system "/panfs/panasas01.panfs.cluster/svxkb/exonerate-2.2.0-x86_64/bin/exonerate --model protein2genome --ryo \">%ti (%tab - %tae)\n%tcs\n\" --showcigar no --showquerygff no --showvulgar no --showalignment yes --useaatla no -q $file -t $genomic > $output";
+system "~/tools/exonerate-2.2.0-x86_64/bin/exonerate --model protein2genome --ryo \">%ti (%tab - %tae)\n%tcs\n\" --showcigar no --showquerygff no --showvulgar no --showalignment yes --useaatla no $file $genomic > $output";
 }
 
 else { print "\n$usage\nWARNING: Cannot proceed without best hit only y/n \n\n"; exit;}
