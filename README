@@ -4,7 +4,10 @@ Exonerate is required to be installed.
 run from the directory where all unzipped scripts are located
 
 predict.genes.by.exonerate.pipeline.pl
-(C) R D Emes University of Nottingham 2010
+
+R D Emes University of Nottingham 2010
+K Brown University of Nottingham 2014
+
 USAGE:
 -s	protein sequence file to use as template for predictions [fasta format]
 -d	directory of of DNA or chromosome files [should be named x.fa]
