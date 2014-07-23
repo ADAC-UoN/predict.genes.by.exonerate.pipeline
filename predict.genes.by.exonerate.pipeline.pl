@@ -8,7 +8,8 @@ use Getopt::Long;
 # Richard Emes University of Nottingham 2010
 my $usage = "
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-(C) R D Emes University of Nottingham 2010
+R D Emes University of Nottingham 2010
+K Brown University of Nottingham 2014
 
 parse exonerate
 
@@ -188,7 +189,7 @@ foreach (@split_files)
 {
 chomp $_;
 
-system "perl list2.subsequence.pl -f $dir -c $_ -o $_\.splits.tojoin";
+system "perl exonerate.list2.subsequence.pl -f $dir -c $_ -o $_\.splits.tojoin";
 }
 
 system "cat *.splits.tojoin > $seq\.predictions.fa";
