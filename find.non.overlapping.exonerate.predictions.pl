@@ -8,7 +8,8 @@ use Getopt::Long;
 # Richard Emes University of Nottingham 2010
 my $usage = "
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-(C) R D Emes University of Nottingham 2010
+R D Emes University of Nottingham 2010
+K Brown University of Nottingham 2014
 
 parse exonerate
 
@@ -155,7 +156,6 @@ foreach (@holding_gene_details)
 
 if ($best_hit_line =~ /^[A-Za-z0-9\_\-]/)
 	{
-	print "yes";
 	print OUT "$prefix\.$number\t$chr\t$best_hit_line\n";
 	$number++;
 	}
