@@ -1,18 +1,16 @@
-the pipeline consists of a series of perl scripts. 
-Exonerate is required to be installed. 
-
-run from the directory where all unzipped scripts are located
-
+the pipeline consists of a perl script.
 predict.genes.by.exonerate.pipeline.pl
 
 R D Emes University of Nottingham 2010
 K Brown University of Nottingham 2014
 
 USAGE:
--s	protein sequence file to use as template for predictions [fasta format]
--d	directory of of DNA or chromosome files [should be named x.fa]
--p	prefix for gene predictions
--o	minimum size of overlap (amino acids of protein seq)
--i	maximum number of introns allowed in predicted genes
+-s  protein sequence file to use as template for predictions [single or multiple fasta format]
+-t  target chromosome or contig files [multiple fasta format]
+-p  prefix for gene predictions
+-o  minimum size of overlap (amino acids of protein seq)
+-i  maximum number of introns allowed in predicted genes
+-j  max number of exonerate jobs to spawn
+
 
 
