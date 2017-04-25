@@ -432,13 +432,13 @@ while (<COMBBEST>)
   {
   chomp $_;
   print FINALBEST "$prefix\.$number\t$_\n";
-  $number++;
   my @data = split '\t', $_;
   my $coordinates = "NA";
   if ($data[9] eq "+") {$coordinates = $data[1]." \($data[6] \- $data[7]\)";}
   if ($data[9] eq "-") {$coordinates = $data[1]." \($data[7] \- $data[6]\)";} #order changes for rev strand
   push @nonoverlapping_lookup, $coordinates;
   $prefixlookup{$coordinates} = "$prefix\.$number";
+  $number++;
   }
 
 
