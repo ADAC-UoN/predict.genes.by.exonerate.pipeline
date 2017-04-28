@@ -71,7 +71,7 @@ open TMPTABTARGETFA, ">$prefix.Target.passed.filter.tab.tmp";
 
 my $time = scalar localtime;
 print "\n$time Filtering target fasta\n";
-open FASTA, $target_fa;
+open (FASTA, $target_fa) or die "Could not open file '$target_fa' $!";
 my $seq_tally = 1;
 my $passed_count = 0;
 {
@@ -274,7 +274,7 @@ print "$time Finished Parsing Exonerate\n";
 ### MERGE OVERLAPPING AND FIND NON OVERLAPPING BEST HITS BASED ON EXOENERATE SCORES
 ###################################################################################
 
-my $time = scalar localtime;
+$time = scalar localtime;
 print "$time Finding non-overlapping best hits\n";
 
 open PARSED, "<$prefix.ex.parsed";
