@@ -12,13 +12,13 @@ R D Emes University of Nottingham 2010
 K Brown University of Nottingham 2014
 
 predict genes from target chromosomes that could encode proteins of interest.
-Spawns multiple jobs (will take time be ready).
+Spawns multiple jobs (will take some time, be prepared).
 
 USAGE:
 -s  protein sequence file to use as template for predictions [single or multiple fasta format]
 -t  target chromosome or contig files [multiple fasta format]
--p  prefix for gene predictions
--o  minimum size of overlap (amino acids of protein seq)
+-p  prefix name for gene predictions
+-o  minimum size of overlap in predicted sequence (amino acids of protein seq)
 -i  maximum number of introns allowed in predicted genes
 -j  max number of exonerate jobs to spawn
 
