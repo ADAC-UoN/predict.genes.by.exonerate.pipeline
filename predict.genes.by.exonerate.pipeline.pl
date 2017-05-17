@@ -5,10 +5,9 @@ use strict;
 use Getopt::Long;
 
 
-# Richard Emes University of Nottingham 2010
 my $usage = "
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-R D Emes University of Nottingham 2010
+R D Emes University of Nottingham 2010-17
 K Brown University of Nottingham 2014
 
 predict genes from target chromosomes that could encode proteins of interest.
@@ -79,9 +78,15 @@ local $/ = '>';
 <FASTA>;                                  # throw away the first line 'cos will only contain ">"
 
 while (<FASTA>) {
-    chomp $_;
-    my ($seq_id, @sequence) = split "\n";            # split the fasta input into Id and sequence
-    my $sequence = join '',@sequence;          # reassembles the sequence
+	chomp $_;
+    	my ($seq_id, @sequence) = split "\n";            # split the fasta input into Id and sequence
+    	# clean fasta sequence ids
+        $seq_id =~ s/\:/\./g;
+        $seq_id =~ s/\s/\./g;
+        $seq_id =~ s/\t/\./g;
+        $seq_id =~ s/\.\./\./g;
+	
+	my $sequence = join '',@sequence;          # reassembles the sequence
         my $length = length $sequence;
 
         if ($length >= 3*$overlap)
@@ -266,7 +271,7 @@ else {}
 }
 
 
-
+close OUT;
 $time = scalar localtime;
 print "$time Finished Parsing Exonerate\n";
 # #
